@@ -220,3 +220,4 @@ MIT — Built by Team Inferous for SIH 2026
 ---
 
 *AIIA TrialSphere is a prototype system using 100% synthetic data. No real patient data is stored or processed.*
+# sih-ps-2
