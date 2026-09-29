@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { studiesApi } from '../api';
-import { Search, Plus, FlaskConical, Filter } from 'lucide-react';
+import { Search, Plus, FlaskConical, Filter, X, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const RISK_COLORS: Record<string, string> = {
@@ -29,6 +29,15 @@ export default function StudiesPage() {
   const [search, setSearch] = useState('');
   const [riskFilter, setRiskFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
+
+  // New Study Form State
+  const [newTitle, setNewTitle] = useState('');
+  const [newCode, setNewCode] = useState(`AIIA-CT-${new Date().getFullYear()}-${Math.floor(Math.random() * 90 + 10)}`);
+  const [newPhase, setNewPhase] = useState('PHASE_2');
+  const [newArea, setNewArea] = useState('Neurology & Rasayana');
+  const [newTarget, setNewTarget] = useState(100);
+  const [newPi, setNewPi] = useState('Dr. Rajesh Sharma');
+
   const navigate = useNavigate();
 
   async function fetchStudies() {
@@ -47,6 +56,29 @@ export default function StudiesPage() {
     if (pct >= 80) return 'var(--success)';
     if (pct >= 50) return 'var(--warning)';
     return 'var(--danger)';
+  }
+
+  function handleCreateStudy(e: React.FormEvent) {
+    e.preventDefault();
+    const created = {
+      id: studies.length + 101,
+      study_code: newCode,
+      title: newTitle || 'Clinical Evaluation of Ayurvedic Formulation',
+      phase: newPhase,
+      therapeutic_area: newArea,
+      site_count: 3,
+      current_enrollment: 0,
+      target_enrollment: Number(newTarget),
+      enrollment_pct: 0,
+      status: 'PROTOCOL_CREATED',
+      risk_level: 'LOW',
+      risk_score: 12,
+      pi_name: newPi
+    };
+    setStudies([created, ...studies]);
+    setTotal(total + 1);
+    setShowModal(false);
+    setNewTitle('');
   }
 
   return (
@@ -160,6 +192,63 @@ export default function StudiesPage() {
           </tbody>
         </table>
       </div>
+
+      {/* NEW STUDY MODAL */}
+      {showModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div className="card" style={{ width: '100%', maxWidth: '540px', background: '#0b1322', border: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>Create New Clinical Trial Protocol</h3>
+              <button onClick={() => setShowModal(false)} className="btn btn-secondary btn-icon" style={{ padding: 4 }}><X size={16} /></button>
+            </div>
+
+            <form onSubmit={handleCreateStudy} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div className="form-group">
+                <label className="form-label">Study Protocol Title</label>
+                <input required type="text" className="form-input" placeholder="e.g. Clinical Trial of Guduchi in Metabolic Disorders" value={newTitle} onChange={e => setNewTitle(e.target.value)} />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div className="form-group">
+                  <label className="form-label">Study Code</label>
+                  <input required type="text" className="form-input" value={newCode} onChange={e => setNewCode(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Clinical Phase</label>
+                  <select className="form-input" value={newPhase} onChange={e => setNewPhase(e.target.value)}>
+                    <option value="PHASE_1">Phase I (Safety)</option>
+                    <option value="PHASE_2">Phase II (Efficacy)</option>
+                    <option value="PHASE_3">Phase III (Comparative)</option>
+                    <option value="PHASE_4">Phase IV (Post-Market)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div className="form-group">
+                  <label className="form-label">Therapeutic Area</label>
+                  <input type="text" className="form-input" value={newArea} onChange={e => setNewArea(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Target Participant Count</label>
+                  <input type="number" className="form-input" value={newTarget} onChange={e => setNewTarget(Number(e.target.value))} />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Principal Investigator (PI)</label>
+                <input type="text" className="form-input" value={newPi} onChange={e => setNewPi(e.target.value)} />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 10 }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary"><CheckCircle2 size={15} /> Save & Register Protocol</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

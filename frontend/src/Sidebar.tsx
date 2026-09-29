@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import {
   LayoutDashboard, FlaskConical, MapPin, Users, ShieldAlert,
   FileCheck, Bell, ClipboardList, Link2, LogOut, Activity,
-  ChevronRight, Settings, Database
+  ChevronRight, Settings, Database, FileText, Home, Sparkles
 } from 'lucide-react';
 
 interface NavItem {
@@ -17,15 +17,17 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { id: 'dashboard', label: 'Executive Dashboard', icon: <LayoutDashboard size={16} />, path: '/' },
+  { id: 'dashboard', label: 'Executive Dashboard', icon: <LayoutDashboard size={16} />, path: '/dashboard' },
   { id: 'studies', label: 'Study Portfolio', icon: <FlaskConical size={16} />, path: '/studies' },
   { id: 'sites', label: 'Site Management', icon: <MapPin size={16} />, path: '/sites' },
   { id: 'participants', label: 'Participants', icon: <Users size={16} />, path: '/participants' },
   { id: 'safety', label: 'Pharmacovigilance', icon: <ShieldAlert size={16} />, path: '/safety' },
   { id: 'compliance', label: 'Compliance & Ethics', icon: <FileCheck size={16} />, path: '/compliance' },
+  { id: 'data-quality', label: 'Data Quality', icon: <Database size={16} />, path: '/data-quality' },
   { id: 'alerts', label: 'Alerts', icon: <Bell size={16} />, path: '/alerts' },
   { id: 'audit', label: 'Audit Ledger', icon: <ClipboardList size={16} />, path: '/audit' },
   { id: 'fhir', label: 'Interoperability', icon: <Link2 size={16} />, path: '/fhir' },
+  { id: 'reports', label: 'Reports & Export', icon: <FileText size={16} />, path: '/reports' },
 ];
 
 export default function Sidebar() {
@@ -52,14 +54,14 @@ export default function Sidebar() {
   }
 
   function isActive(path: string) {
-    if (path === '/') return location.pathname === '/';
+    if (path === '/dashboard') return location.pathname === '/' || location.pathname === '/dashboard';
     return location.pathname.startsWith(path);
   }
 
   return (
     <div className="sidebar">
       <div className="sidebar-brand">
-        <div className="brand-logo">
+        <div className="brand-logo" onClick={() => navigate('/landing')} style={{ cursor: 'pointer' }}>
           <div className="brand-icon">⚗</div>
           <div className="brand-text">
             <span className="brand-name">AIIA TrialSphere</span>
@@ -71,6 +73,18 @@ export default function Sidebar() {
       <nav className="sidebar-nav">
         <div className="nav-section">
           <div className="nav-section-label">Navigation</div>
+          
+          <button
+            className="nav-item"
+            onClick={() => navigate('/landing')}
+            id="nav-landing-page"
+            style={{ color: '#38bdf8' }}
+          >
+            <Home size={16} />
+            <span>Landing Page</span>
+            <span className="badge badge-cyan" style={{ fontSize: 9, padding: '2px 6px' }}>Public</span>
+          </button>
+
           {navItems.map(item => (
             <button
               key={item.id}
@@ -89,13 +103,13 @@ export default function Sidebar() {
 
         <div className="nav-section">
           <div className="nav-section-label">System</div>
-          <button className="nav-item" onClick={() => {}} id="nav-settings">
+          <button
+            className={`nav-item ${location.pathname === '/settings' ? 'active' : ''}`}
+            onClick={() => navigate('/settings')}
+            id="nav-settings"
+          >
             <Settings size={16} />
-            <span>Settings</span>
-          </button>
-          <button className="nav-item" onClick={() => {}} id="nav-database">
-            <Database size={16} />
-            <span>Data Quality</span>
+            <span>Settings & e-Sig</span>
           </button>
         </div>
       </nav>
