@@ -19,11 +19,15 @@ export default function AlertsPage() {
   async function fetchAlerts() {
     setLoading(true);
     try {
-      const res = await alertsApi.list({ limit: 100, alert_type: typeFilter || undefined });
-      setAlerts(res.data.alerts);
-      setTotal(res.data.total);
-    } catch (e) { }
-    finally { setLoading(false); }
+      const res = await alertsApi.list({ limit: 100, alert_type: typeFilter || undefined, type: typeFilter || undefined });
+      const alertList = res.data?.alerts || [];
+      setAlerts(alertList);
+      setTotal(res.data?.total || alertList.length);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { fetchAlerts(); }, [typeFilter]);
@@ -58,7 +62,7 @@ export default function AlertsPage() {
             onClick={() => setTypeFilter(t)}
             id={`alert-filter-${t || 'all'}`}
           >
-            {t ? `${TYPE_ICONS[t]} ${t.replace('_', ' ')}` : 'All Alerts'}
+            {t ? `${TYPE_ICONS[t] || '⚠'} ${t.replace('_', ' ')}` : 'All Alerts'}
           </button>
         ))}
       </div>
@@ -67,42 +71,47 @@ export default function AlertsPage() {
         {loading ? (
           <div className="loading-screen"><div className="spinner" style={{ width: 28, height: 28 }} /></div>
         ) : alerts.length === 0 ? (
-          <div className="empty-state">
-            <div style={{ fontSize: 48 }}>✓</div>
-            <div className="empty-state-text">No open alerts</div>
+          <div className="empty-state" style={{ textAlign: 'center', padding: '40px 20px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 40, marginBottom: 8 }}>✓</div>
+            <div className="empty-state-text" style={{ fontSize: 16, color: 'var(--text-secondary)' }}>No open alerts in this category</div>
           </div>
-        ) : alerts.map(alert => (
-          <div key={alert.id} className={`alert-item ${SEV_CLASS[alert.severity] || 'info'}`} id={`alert-${alert.id}`}>
-            <div className="alert-icon" style={{
-              background: alert.severity === 'CRITICAL' ? 'rgba(239,68,68,0.15)' : alert.severity === 'WARNING' ? 'rgba(245,158,11,0.15)' : 'rgba(59,130,246,0.15)',
-              color: alert.severity === 'CRITICAL' ? '#ef4444' : alert.severity === 'WARNING' ? '#f59e0b' : '#3b82f6',
-              fontSize: 18,
-            }}>
-              {TYPE_ICONS[alert.alert_type] || '⚠'}
-            </div>
-            <div className="alert-content">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-                <span className="alert-title">{alert.title}</span>
-                <span className={`badge ${alert.severity === 'CRITICAL' ? 'badge-danger' : alert.severity === 'WARNING' ? 'badge-warning' : 'badge-info'}`}>
-                  {alert.severity}
-                </span>
-                <span className="badge badge-neutral">{alert.alert_type.replace('_', ' ')}</span>
+        ) : alerts.map(alert => {
+          const alertType = alert.type || alert.alert_type || 'GENERAL';
+          const severity = alert.severity || 'INFO';
+          return (
+            <div key={alert.id} className={`alert-item ${SEV_CLASS[severity] || 'info'}`} id={`alert-${alert.id}`}>
+              <div className="alert-icon" style={{
+                background: severity === 'CRITICAL' ? 'rgba(239,68,68,0.15)' : severity === 'WARNING' ? 'rgba(245,158,11,0.15)' : 'rgba(59,130,246,0.15)',
+                color: severity === 'CRITICAL' ? '#ef4444' : severity === 'WARNING' ? '#f59e0b' : '#3b82f6',
+                fontSize: 18,
+              }}>
+                {TYPE_ICONS[alertType] || '⚠'}
               </div>
-              <div className="alert-msg">{alert.message}</div>
-              <div className="alert-meta">
-                {alert.created_at && `Triggered ${new Date(alert.created_at).toLocaleString()}`}
+              <div className="alert-content">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2, flexWrap: 'wrap' }}>
+                  <span className="alert-title" style={{ fontWeight: 700, fontSize: 14 }}>{alert.title}</span>
+                  <span className={`badge ${severity === 'CRITICAL' ? 'badge-danger' : severity === 'WARNING' ? 'badge-warning' : 'badge-info'}`}>
+                    {severity}
+                  </span>
+                  <span className="badge badge-neutral">{alertType.replace('_', ' ')}</span>
+                </div>
+                <div className="alert-msg">{alert.message}</div>
+                <div className="alert-meta" style={{ marginTop: 4, fontSize: 11, color: 'var(--text-muted)' }}>
+                  {alert.created_at ? `Triggered ${new Date(alert.created_at).toLocaleString()}` : 'Active system alert'}
+                </div>
               </div>
+              <button
+                className="btn btn-success btn-sm"
+                onClick={() => handleResolve(alert.id)}
+                disabled={resolving === alert.id}
+                id={`btn-resolve-${alert.id}`}
+                style={{ flexShrink: 0 }}
+              >
+                {resolving === alert.id ? <div className="spinner" style={{ width: 14, height: 14 }} /> : <><CheckCircle2 size={13} /> Resolve</>}
+              </button>
             </div>
-            <button
-              className="btn btn-success btn-sm"
-              onClick={() => handleResolve(alert.id)}
-              disabled={resolving === alert.id}
-              id={`btn-resolve-${alert.id}`}
-            >
-              {resolving === alert.id ? <div className="spinner" style={{ width: 14, height: 14 }} /> : <><CheckCircle2 size={13} /> Resolve</>}
-            </button>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {toast && <div className="toast toast-success"><CheckCircle2 size={16} /> {toast}</div>}

@@ -36,17 +36,15 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Public Landing Page */}
+      {/* Root & Landing Page always show Landing Page first */}
+      <Route path="/" element={<LandingPage />} />
       <Route path="/landing" element={<LandingPage />} />
 
       {/* Auth */}
       <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
 
-      {/* Home Route: Landing Page if guest, Dashboard if logged in */}
-      <Route path="/" element={user ? <ProtectedLayout><DashboardPage /></ProtectedLayout> : <LandingPage />} />
+      {/* Dashboard & App Modules */}
       <Route path="/dashboard" element={<ProtectedLayout><DashboardPage /></ProtectedLayout>} />
-
-      {/* App Modules */}
       <Route path="/studies" element={<ProtectedLayout><StudiesPage /></ProtectedLayout>} />
       <Route path="/studies/:id" element={<ProtectedLayout><StudyDetailPage /></ProtectedLayout>} />
       <Route path="/sites" element={<ProtectedLayout><SitesPage /></ProtectedLayout>} />

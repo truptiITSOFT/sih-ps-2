@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { dashboardApi } from '../api';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -76,6 +77,7 @@ const CUSTOM_TOOLTIP_STYLE = {
 import { MOCK_DASHBOARD_SUMMARY, MOCK_ENROLLMENT_TREND, MOCK_ALERTS } from '../mockData';
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const [summary, setSummary] = useState<any>(MOCK_DASHBOARD_SUMMARY);
   const [trend, setTrend] = useState<any[]>(MOCK_ENROLLMENT_TREND);
   const [alerts, setAlerts] = useState<any[]>(MOCK_ALERTS);
@@ -293,7 +295,7 @@ export default function DashboardPage() {
       <div className="card">
         <div className="card-header">
           <div className="card-title"><Bell size={15} /> Recent Open Alerts</div>
-          <button className="btn btn-secondary btn-sm" onClick={() => window.location.href = '/alerts'} id="btn-view-all-alerts">
+          <button className="btn btn-secondary btn-sm" onClick={() => navigate('/alerts')} id="btn-view-all-alerts">
             View All →
           </button>
         </div>

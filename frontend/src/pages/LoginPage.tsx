@@ -20,7 +20,7 @@ export default function LoginPage() {
       const res = await authApi.login(selectedEmail);
       if (res?.data?.user && res?.data?.access_token) {
         login(res.data.user, res.data.access_token);
-        navigate('/');
+        navigate('/dashboard');
         return;
       }
     } catch {
@@ -47,7 +47,7 @@ export default function LoginPage() {
 
     login(fallbackUser, 'demo_token_' + btoa(selectedEmail + '_' + Date.now()));
     setLoading(false);
-    navigate('/');
+    navigate('/dashboard');
   }
 
   const quickRoles = [

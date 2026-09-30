@@ -118,7 +118,9 @@ export const safetyApi = {
       {
         adverse_events: MOCK_SAFETY_AES.filter((ae) => {
           if (params?.severity && ae.severity !== params.severity) return false;
-          if (params?.is_serious !== undefined && ae.is_serious !== params.is_serious) return false;
+          const checkSerious = params?.is_sae !== undefined ? params.is_sae : params?.is_serious;
+          if (checkSerious !== undefined && ae.is_serious !== checkSerious) return false;
+          if (params?.status && ae.status !== params.status) return false;
           return true;
         }),
         total: MOCK_SAFETY_AES.length,
